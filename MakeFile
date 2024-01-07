@@ -1,0 +1,3 @@
+all:
+	@g++ main.cpp -IC:/Json/json-develop/include -o main
+	@./main

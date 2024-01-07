@@ -1,0 +1,18 @@
+[
+    {
+        "Balance": 1000,
+        "DOB": "20/06/2001",
+        "IDPersonal": "036201009434",
+        "Name": "Pham Van Du",
+        "NumAccount": "221685761892",
+        "PinCode": "761423"
+    },
+    {
+        "Balance": 330,
+        "DOB": "02/08/2001",
+        "IDPersonal": "036201009532",
+        "Name": "Pham Dinh Binh",
+        "NumAccount": "882455171152",
+        "PinCode": "174094"
+    }
+]
