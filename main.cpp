@@ -22,6 +22,16 @@ struct AccountInfo
     string pinCode;
     int balance;
 };
+
+struct Transaction
+{
+    string userNameSend;
+    string numAccountSender;
+    string numAccountReceiver;
+    string userNameReceive;
+    int amount;
+};
+
 void Continue()
 {
     cout << "Do you want to process another function Y/N ?" << endl;
@@ -67,7 +77,56 @@ std::string gen_random(const int len)
 
     return tmp_s;
 }
+class TransactionHistoryAll
+{
+public:
+    TransactionHistoryAll()
+    {
+    }
+    string getNumAccountSender()
+    {
+        return transaction.numAccountSender;
+    }
+    void setNumAccountSender(string _numAccountSender)
+    {
+        transaction.numAccountSender = _numAccountSender;
+    }
+    string getNumAccountReceive()
+    {
+        return transaction.numAccountReceiver;
+    }
+    void setNumAccountReceive(string _numAccountReceive)
+    {
+        transaction.numAccountReceiver = _numAccountReceive;
+    }
+    string getUserNameSend()
+    {
+        return transaction.userNameSend;
+    }
+    void setUserNameSend(string _userNameSend)
+    {
+        transaction.userNameSend = _userNameSend;
+    }
+    string getUserNameReceive()
+    {
+        return transaction.userNameReceive;
+    }
+    void setUserNameReceive(string _userNameReceive)
+    {
+        transaction.userNameReceive = _userNameReceive;
+    }
+    int getAmount()
+    {
+        return transaction.amount;
+    }
+    void setAmount(int _amount)
+    {
+        transaction.amount = _amount;
+    }
 
+private:
+    struct Transaction transaction;
+};
 class PersonalAccount
 {
 private:
@@ -132,23 +191,30 @@ class BankManagement
 {
 private:
     static std::vector<PersonalAccount> userInfor;
+    static std::vector<TransactionHistoryAll> transactionHistory;
 
 public:
     BankManagement()
     {
     }
     ~BankManagement() = default;
-    bool checkPinCodeDuplicate(const string &PinCode){
-        for(int i = 0; i < userInfor.size(); i++){
-            if(PinCode == userInfor[i].getPinCode()){
+    bool checkPinCodeDuplicate(const string &PinCode)
+    {
+        for (int i = 0; i < userInfor.size(); i++)
+        {
+            if (PinCode == userInfor[i].getPinCode())
+            {
                 return false;
             }
         }
         return true;
     }
-    bool checkNumAccountDuplicate(const string &NumAccount){
-        for(int i = 0; i < userInfor.size(); i++){
-            if(NumAccount == userInfor[i].getNumAccount()){
+    bool checkNumAccountDuplicate(const string &NumAccount)
+    {
+        for (int i = 0; i < userInfor.size(); i++)
+        {
+            if (NumAccount == userInfor[i].getNumAccount())
+            {
                 return false;
             }
         }
@@ -177,11 +243,13 @@ public:
         BankManagement b;
         bool checkPinCode = b.checkPinCodeDuplicate(PinCode);
         bool checkAccount = b.checkNumAccountDuplicate(NumAccount);
-        while(!checkPinCode){
+        while (!checkPinCode)
+        {
             PinCode = gen_random(6);
             checkPinCode = b.checkPinCodeDuplicate(PinCode);
         }
-        while(!checkAccount){
+        while (!checkAccount)
+        {
             NumAccount = gen_random(12);
             checkAccount = b.checkNumAccountDuplicate(NumAccount);
         }
@@ -189,8 +257,8 @@ public:
         personalAccount.setNumAccount(NumAccount);
         userInfor.push_back(personalAccount);
     }
-    static void LockAccountBank(){
-        
+    static void LockAccountBank()
+    {
     }
     static void Deposite()
     {
@@ -302,10 +370,13 @@ public:
         string numAccount;
         cout << "Please type your number account: ";
         getline(cin, numAccount);
+        TransactionHistoryAll hs;
         for (int i = 0; i < userInfor.size(); i++)
         {
             if (numAccount == userInfor[i].getNumAccount())
             {
+                string senderName = userInfor[i].getName();
+                hs.setNumAccountSender(senderName);
                 cout << "Please type the account you want to transfer: ";
                 string numAccountTransfer;
                 getline(cin, numAccountTransfer);
@@ -331,6 +402,8 @@ public:
                 {
                     if (numAccountTransfer == userInfor[j].getNumAccount())
                     {
+                        string receiverName = userInfor[i].getName();
+                        hs.setNumAccountSender(receiverName);
                         cout << "Please type the money you want transfer: ";
                         int moneyTransfer;
                         cin >> moneyTransfer;
@@ -350,6 +423,7 @@ public:
                 break;
             }
         }
+        transactionHistory.push_back(hs);
     }
     std::vector<PersonalAccount> getVector()
     {
@@ -359,9 +433,17 @@ public:
     {
         userInfor = _vt;
     }
+    std::vector<TransactionHistoryAll> getTransaction()
+    {
+        return transactionHistory;
+    }
+    void setTransaction(std::vector<TransactionHistoryAll> _vt)
+    {
+        transactionHistory = _vt;
+    }
 };
 std::vector<PersonalAccount> BankManagement::userInfor = {};
-
+std::vector<TransactionHistoryAll> BankManagement::transactionHistory = {};
 class HandleJson
 {
 private:
@@ -375,7 +457,6 @@ public:
     void LoadDataFromFile(const char *fileName)
     {
         std::ifstream ifs(fileName);
-
         json j = json::parse(ifs);
         vector<PersonalAccount> vt;
         for (int i = 0; i < j.size(); i++)
@@ -409,6 +490,39 @@ public:
         std::ofstream f(fileName);
         f << data;
     }
+    void LoadTransactionFromFile(const char *fileName)
+    {
+        std::ifstream ifs(fileName);
+        json j = json::parse(ifs);
+        vector<TransactionHistoryAll> thVector;
+        for(int i = 0; i < j.size(); i++){
+            TransactionHistoryAll th;
+            th.setNumAccountSender(j[i]["NumAccountSender"]);
+            th.setUserNameSend(j[i]["NameUserSender"]);
+            th.setNumAccountReceive(j[i]["NameUserReceiver"]);
+            th.setUserNameReceive(j[i]["NameUserReceiver"]);
+            th.setAmount(j[i]["Amount"]);
+            thVector.push_back(th);
+        }
+        a->setTransaction(thVector);
+        
+    }
+    void SaveTransactionToFile(const char *fileName)
+    {
+        json data = json::array();
+        for (int i = 0; i < a->getTransaction().size(); i++){
+            json j = {
+                {"NameUserSender", a->getTransaction()[i].getUserNameSend()},
+                {"NumAccountSender", a->getTransaction()[i].getNumAccountSender()},
+                {"NameUserReceiver", a->getTransaction()[i].getUserNameReceive()},
+                {"NumAccountReceiver", a->getTransaction()[i].getNumAccountReceive()},
+                {"Amount", a->getTransaction()[i].getAmount()}};
+            data.push_back(j);
+        }
+        std::ofstream f(fileName);
+        f << data;
+
+    }
     BankManagement *getA()
     {
         return a;
@@ -418,7 +532,7 @@ int main()
 {
     cout << "===========Welcome to my bank===========" << endl;
     Loading("Data Loading");
-    const char *fileName = "test.json";
+    const char *fileName = "dataUser.json";
     HandleJson handleJson;
     handleJson.LoadDataFromFile(fileName);
     while (1)
