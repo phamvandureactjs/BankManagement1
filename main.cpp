@@ -47,7 +47,8 @@ void Loading(string s)
             cout << ".";
             cout.flush();
             // Sử dụng std::this_thread::sleep_for để thay thế _sleep
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            _sleep(1);
         }
         cout << "\b\b\b   \b\b\b";
     }
@@ -137,6 +138,22 @@ public:
     {
     }
     ~BankManagement() = default;
+    bool checkPinCodeDuplicate(const string &PinCode){
+        for(int i = 0; i < userInfor.size(); i++){
+            if(PinCode == userInfor[i].getPinCode()){
+                return false;
+            }
+        }
+        return true;
+    }
+    bool checkNumAccountDuplicate(const string &NumAccount){
+        for(int i = 0; i < userInfor.size(); i++){
+            if(NumAccount == userInfor[i].getNumAccount()){
+                return false;
+            }
+        }
+        return true;
+    }
     static void CreateAccountBank(PersonalAccount &personalAccount)
     {
         cin.ignore();
@@ -152,13 +169,28 @@ public:
         string dob;
         cout << "Type Date Of Birth:";
         getline(cin, dob);
-        personalAccount.setDOB(dob);
-        // personalAccount.setBalance(0);
-        personalAccount.setPinCode((gen_random(6)));
-        personalAccount.setNumAccount((gen_random(12)));
         Loading("Creating account");
-        cout << personalAccount.getNumAccount() << " " << personalAccount.getPinCode() << endl;
+        personalAccount.setDOB(dob);
+        personalAccount.setBalance(0);
+        string PinCode = gen_random(6);
+        string NumAccount = gen_random(12);
+        BankManagement b;
+        bool checkPinCode = b.checkPinCodeDuplicate(PinCode);
+        bool checkAccount = b.checkNumAccountDuplicate(NumAccount);
+        while(!checkPinCode){
+            PinCode = gen_random(6);
+            checkPinCode = b.checkPinCodeDuplicate(PinCode);
+        }
+        while(!checkAccount){
+            NumAccount = gen_random(12);
+            checkAccount = b.checkNumAccountDuplicate(NumAccount);
+        }
+        personalAccount.setPinCode(PinCode);
+        personalAccount.setNumAccount(NumAccount);
         userInfor.push_back(personalAccount);
+    }
+    static void LockAccountBank(){
+        
     }
     static void Deposite()
     {
@@ -170,6 +202,7 @@ public:
         string numAccount;
         cout << "Please type the your number account: ";
         getline(cin, numAccount);
+        Loading("Depositing");
         for (int i = 0; i < userInfor.size(); i++)
         {
             if (numAccount == userInfor[i].getNumAccount())
@@ -180,7 +213,6 @@ public:
                 break;
             }
         }
-        Loading("Depositing");
     }
     static void Withdraw()
     {
@@ -188,6 +220,7 @@ public:
         string numAccount;
         cout << "Please type your number account: ";
         getline(cin, numAccount);
+        Loading("Withdrawing");
         for (int i = 0; i < userInfor.size(); i++)
         {
             if (numAccount == userInfor[i].getNumAccount())
@@ -225,7 +258,6 @@ public:
                 break;
             }
         }
-        Loading("Withdrawing");
     }
     static void ChangePINCode()
     {
@@ -233,6 +265,7 @@ public:
         string numAccount;
         cout << "Please type your number account: ";
         getline(cin, numAccount);
+        Loading("Changing");
         for (int i = 0; i < userInfor.size(); i++)
         {
             if (numAccount == userInfor[i].getNumAccount())
@@ -262,7 +295,6 @@ public:
                 break;
             }
         }
-        Loading("Changing");
     }
     static void Transfer()
     {
@@ -442,6 +474,7 @@ int main()
         }
         else
         {
+            exit(0);
         }
     }
     return 0;
